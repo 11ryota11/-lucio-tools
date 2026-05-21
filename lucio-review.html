@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美容室Lucio｜口コミアンケート</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C49A3C;
+    --gold-light: #E8C97A;
+    --gold-pale: #FAF3E0;
+    --gold-border: #D4AF5A;
+    --text: #3A2E1E;
+    --text-light: #7A6A50;
+    --white: #FFFFFF;
+    --bg: #FDFAF5;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(196,154,60,0.12);
+  }
+
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 48px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    background: var(--white);
+    border-bottom: 2px solid var(--gold-border);
+    padding: 18px 20px 14px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 12px rgba(196,154,60,0.10);
+  }
+  .header-logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+  }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text-light);
+    letter-spacing: 0.2em;
+    margin-top: 2px;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 24px 0;
+  }
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+  .progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    height: 2px;
+    background: #E8DCC8;
+    z-index: 0;
+  }
+  .progress-fill {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    z-index: 1;
+    transition: width 0.4s ease;
+  }
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #E8DCC8;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #C8B898;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+  .step-dot.active {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--white);
+    box-shadow: 0 0 0 4px rgba(196,154,60,0.18);
+  }
+  .step-dot.done {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--white);
+  }
+  .step-dot.done::after {
+    content: '✓';
+    font-size: 13px;
+  }
+  .step-dot.done span { display: none; }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 20px 16px 0;
+    padding: 28px 24px 24px;
+    display: none;
+    animation: fadeUp 0.35s ease forwards;
+  }
+  .card.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .screen-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .screen-hint {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 20px;
+  }
+
+  /* Checkbox options */
+  .option-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid #EDE5D0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--white);
+    position: relative;
+  }
+  .option-label:hover {
+    border-color: var(--gold-light);
+    background: var(--gold-pale);
+  }
+  .option-label.selected {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+  }
+  .option-label input { display: none; }
+  .option-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #D4C5A8;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: transparent;
+  }
+  .option-label.selected .option-check {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--white);
+  }
+  .option-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.03em;
+  }
+
+  /* Stars */
+  .star-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 8px 0 16px;
+  }
+  .star-btn {
+    font-size: 40px;
+    cursor: pointer;
+    color: #DDD;
+    transition: color 0.15s, transform 0.15s;
+    background: none;
+    border: none;
+    padding: 4px;
+    line-height: 1;
+  }
+  .star-btn:hover,
+  .star-btn.lit {
+    color: var(--gold-light);
+    transform: scale(1.15);
+  }
+  .star-btn.selected {
+    color: var(--gold);
+  }
+  .star-label {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-light);
+    min-height: 20px;
+    font-weight: 600;
+  }
+
+  /* Textarea */
+  .comment-area {
+    width: 100%;
+    min-height: 110px;
+    border: 1.5px solid #EDE5D0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--white);
+  }
+  .comment-area:focus {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+  }
+  .comment-area::placeholder { color: #C8B898; }
+
+  /* Review output */
+  .review-box {
+    background: var(--gold-pale);
+    border: 1.5px solid var(--gold-border);
+    border-radius: 12px;
+    padding: 18px 16px;
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--text);
+    white-space: pre-wrap;
+    margin-bottom: 20px;
+    word-break: break-all;
+  }
+  .copy-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 14px rgba(196,154,60,0.35);
+  }
+  .copy-btn:active { opacity: 0.85; transform: scale(0.98); }
+  .copy-btn.copied {
+    background: linear-gradient(135deg, #6AAE7A, #92C9A0);
+    box-shadow: 0 4px 14px rgba(100,180,120,0.35);
+  }
+  .copy-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 10px;
+  }
+
+  /* Nav buttons */
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .btn-back {
+    flex: 1;
+    padding: 14px;
+    border: 1.5px solid var(--gold-border);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--gold);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { background: var(--gold-pale); }
+  .btn-next {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(196,154,60,0.30);
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-next:disabled {
+    background: #DDD;
+    box-shadow: none;
+    cursor: not-allowed;
+    color: #AAA;
+  }
+  .btn-next:not(:disabled):active { opacity: 0.85; transform: scale(0.98); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #3A2E1E;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Thank you banner */
+  .thankyou-icon {
+    font-size: 56px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .thankyou-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .thankyou-body {
+    font-size: 14px;
+    color: var(--text-light);
+    text-align: center;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px dashed #E0D0B0;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 360px) {
+    .screen-title { font-size: 16px; }
+    .star-btn { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">Lucio</div>
+  <div class="header-sub">BEAUTY SALON — KOCHI KUZUSHIMA</div>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-steps" id="progressSteps">
+    <div class="progress-fill" id="progressFill"></div>
+    <div class="step-dot active" id="dot1"><span>1</span></div>
+    <div class="step-dot" id="dot2"><span>2</span></div>
+    <div class="step-dot" id="dot3"><span>3</span></div>
+    <div class="step-dot" id="dot4"><span>4</span></div>
+    <div class="step-dot" id="dot5"><span>5</span></div>
+  </div>
+</div>
+
+<!-- Screen 1: Menu -->
+<div class="card active" id="screen1">
+  <div class="screen-num">STEP 01 / 05</div>
+  <div class="screen-title">本日のメニューを教えてください</div>
+  <div class="screen-hint">複数選択できます</div>
+  <div class="option-grid">
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="髪質改善トリートメント">
+      <div class="option-check">✓</div>
+      <span class="option-text">髪質改善トリートメント</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="ヘッドスパ">
+      <div class="option-check">✓</div>
+      <span class="option-text">ヘッドスパ</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="白髪ぼかしカラー">
+      <div class="option-check">✓</div>
+      <span class="option-text">白髪ぼかしカラー</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="白髪ぼかしハイライト">
+      <div class="option-check">✓</div>
+      <span class="option-text">白髪ぼかしハイライト</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="カラー">
+      <div class="option-check">✓</div>
+      <span class="option-text">カラー</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="カット">
+      <div class="option-check">✓</div>
+      <span class="option-text">カット</span>
+    </label>
+  </div>
+  <div class="nav-row">
+    <button class="btn-next" id="next1" onclick="goTo(2)" disabled>次へ　→</button>
+  </div>
+</div>
+
+<!-- Screen 2: Stars -->
+<div class="card" id="screen2">
+  <div class="screen-num">STEP 02 / 05</div>
+  <div class="screen-title">本日の満足度はいかがでしたか？</div>
+  <div class="screen-hint">星をタップして評価してください</div>
+  <div class="star-row" id="starRow">
+    <button class="star-btn" data-val="1" onclick="setStar(1)">★</button>
+    <button class="star-btn" data-val="2" onclick="setStar(2)">★</button>
+    <button class="star-btn" data-val="3" onclick="setStar(3)">★</button>
+    <button class="star-btn" data-val="4" onclick="setStar(4)">★</button>
+    <button class="star-btn" data-val="5" onclick="setStar(5)">★</button>
+  </div>
+  <div class="star-label" id="starLabel">タップして選択</div>
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo(1)">← 戻る</button>
+    <button class="btn-next" id="next2" onclick="goTo(3)" disabled>次へ　→</button>
+  </div>
+</div>
+
+<!-- Screen 3: Good points -->
+<div class="card" id="screen3">
+  <div class="screen-num">STEP 03 / 05</div>
+  <div class="screen-title">特に良かった点を選んでください</div>
+  <div class="screen-hint">複数選択できます</div>
+  <div class="option-grid">
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="仕上がり">
+      <div class="option-check">✓</div>
+      <span class="option-text">仕上がり</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="雰囲気">
+      <div class="option-check">✓</div>
+      <span class="option-text">雰囲気</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="カウンセリング">
+      <div class="option-check">✓</div>
+      <span class="option-text">カウンセリング</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="居心地">
+      <div class="option-check">✓</div>
+      <span class="option-text">居心地</span>
+    </label>
+    <label class="option-label" onclick="toggleOption(this)">
+      <input type="checkbox" value="スタッフの対応">
+      <div class="option-check">✓</div>
+      <span class="option-text">スタッフの対応</span>
+    </label>
+  </div>
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo(2)">← 戻る</button>
+    <button class="btn-next" id="next3" onclick="goTo(4)" disabled>次へ　→</button>
+  </div>
+</div>
+
+<!-- Screen 4: Comment -->
+<div class="card" id="screen4">
+  <div class="screen-num">STEP 04 / 05</div>
+  <div class="screen-title">一言コメント（任意）</div>
+  <div class="screen-hint">自由にご記入ください。そのまま口コミに活かします</div>
+  <textarea class="comment-area" id="commentInput" placeholder="例）とても丁寧に対応していただきました！また来ます。"></textarea>
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo(3)">← 戻る</button>
+    <button class="btn-next" onclick="buildReview(); goTo(5);">口コミを生成　→</button>
+  </div>
+</div>
+
+<!-- Screen 5: Review -->
+<div class="card" id="screen5">
+  <div class="screen-num">STEP 05 / 05</div>
+  <div class="screen-title">口コミ文が完成しました！</div>
+  <div class="screen-hint">下のボタンでコピーしてGoogleへ投稿できます</div>
+  <div class="review-box" id="reviewText"></div>
+  <button class="copy-btn" id="copyBtn" onclick="copyAndOpen()">
+    📋　コピーしてGoogleへ投稿する
+  </button>
+  <div class="copy-hint">ボタンを押すと文章がコピーされ、Googleマップが開きます</div>
+  <hr class="divider">
+  <div class="nav-row">
+    <button class="btn-back" onclick="goTo(4)">← 修正する</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ コピーしました！Googleを開いています…</div>
+
+<script>
+  // ---- State ----
+  let currentScreen = 1;
+  let selectedMenus = [];
+  let selectedStar = 0;
+  let selectedGoods = [];
+
+  const starLabels = ['', 'もう少し改善が必要です', '普通でした', '良かったです', 'とても良かったです！', '最高でした！'];
+
+  // ---- Navigation ----
+  function goTo(n) {
+    document.getElementById('screen' + currentScreen).classList.remove('active');
+    document.getElementById('screen' + n).classList.add('active');
+    currentScreen = n;
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(step) {
+    const total = 5;
+    for (let i = 1; i <= total; i++) {
+      const dot = document.getElementById('dot' + i);
+      dot.className = 'step-dot';
+      dot.innerHTML = '<span>' + i + '</span>';
+      if (i < step) { dot.classList.add('done'); dot.innerHTML = ''; }
+      else if (i === step) dot.classList.add('active');
+    }
+    const pct = ((step - 1) / (total - 1)) * 100;
+    document.getElementById('progressFill').style.width = 'calc(' + pct + '% - 28px)';
+  }
+
+  // ---- Toggle options ----
+  function toggleOption(label) {
+    label.classList.toggle('selected');
+    const cb = label.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    refreshMenuState();
+    refreshGoodState();
+  }
+
+  function refreshMenuState() {
+    const checked = Array.from(document.querySelectorAll('#screen1 input[type=checkbox]:checked'));
+    selectedMenus = checked.map(c => c.value);
+    document.getElementById('next1').disabled = selectedMenus.length === 0;
+  }
+
+  function refreshGoodState() {
+    const checked = Array.from(document.querySelectorAll('#screen3 input[type=checkbox]:checked'));
+    selectedGoods = checked.map(c => c.value);
+    document.getElementById('next3').disabled = selectedGoods.length === 0;
+  }
+
+  // ---- Stars ----
+  function setStar(val) {
+    selectedStar = val;
+    const btns = document.querySelectorAll('.star-btn');
+    btns.forEach((b, i) => {
+      b.classList.toggle('selected', i < val);
+    });
+    document.getElementById('starLabel').textContent = '★'.repeat(val) + '　' + starLabels[val];
+    document.getElementById('next2').disabled = false;
+  }
+
+  // Star hover effect
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      const val = parseInt(btn.dataset.val);
+      document.querySelectorAll('.star-btn').forEach((b, i) => {
+        b.classList.toggle('lit', i < val);
+      });
+    });
+    btn.addEventListener('mouseleave', () => {
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+    });
+  });
+
+  // ---- Review generation ----
+  function buildReview() {
+    const comment = document.getElementById('commentInput').value.trim();
+    const menus = selectedMenus;
+    const goods = selectedGoods;
+    const stars = selectedStar;
+
+    // Star expression
+    const starEmoji = '★'.repeat(stars) + '☆'.repeat(5 - stars);
+
+    // Menu sentence
+    let menuSentence = '';
+    if (menus.length === 1) {
+      menuSentence = menus[0] + 'をお願いしました。';
+    } else {
+      const last = menus[menus.length - 1];
+      const others = menus.slice(0, -1).join('・');
+      menuSentence = others + 'と' + last + 'をお願いしました。';
+    }
+
+    // Good points sentence
+    let goodSentence = '';
+    if (goods.length === 1) {
+      goodSentence = goods[0] + 'がとても良かったです。';
+    } else {
+      const last = goods[goods.length - 1];
+      const others = goods.slice(0, -1).join('・');
+      goodSentence = others + 'はもちろん、' + last + 'もとても良かったです。';
+    }
+
+    // Star-based opening
+    const openings = {
+      1: '今回利用させていただきました。',
+      2: '今回初めて利用しました。',
+      3: '高知市葛島にある美容室Lucio（ルチオ）を利用しました。',
+      4: '高知市葛島にある美容室Lucio（ルチオ）に行ってきました！',
+      5: '高知市葛島にある美容室Lucio（ルチオ）に行ってきました！最高のサロンです✨'
+    };
+
+    // Keyword-rich body
+    const bodies = {
+      1: `完全予約制のサロンで、マンツーマンで対応いただきました。${menuSentence}${goodSentence}`,
+      2: `完全予約制のサロンで、マンツーマンでの丁寧な施術を受けました。${menuSentence}${goodSentence}`,
+      3: `完全予約制・マンツーマンのサロンで、大人女性に嬉しい落ち着いた空間でした。${menuSentence}${goodSentence}野村さんの施術で髪質改善を実感できました。`,
+      4: `完全予約制・マンツーマンのサロンで、大人女性にぴったりの上質な空間です。${menuSentence}${goodSentence}野村さんのカウンセリングが丁寧で、髪のお悩みをしっかり聞いていただけました。白髪ぼかしや髪質改善メニューも充実していて、次回も楽しみです。`,
+      5: `完全予約制・マンツーマンのサロンで、大人女性にぴったりの上質な空間です。${menuSentence}${goodSentence}担当の野村さんは髪質改善や白髪ぼかし、ヘッドスパのプロで、カウンセリングがとても丁寧！自分の髪の悩みを細かく聞いてもらえて安心してお任せできました。葛島エリアでこんなに居心地の良いサロンに出会えて本当によかったです。`
+    };
+
+    // Comment integration
+    let commentPart = '';
+    if (comment) {
+      commentPart = '\n\n' + comment;
+    }
+
+    // Closing
+    const closings = {
+      1: '\nまた機会があれば利用したいと思います。',
+      2: '\nまた利用してみたいと思います。',
+      3: '\nまた利用したいと思います。ありがとうございました！',
+      4: '\nヘッドスパや髪質改善が気になっている方にぜひおすすめしたいサロンです！またお世話になります♪',
+      5: '\n高知市でヘッドスパ・髪質改善・白髪ぼかしをお探しの大人女性にぜひおすすめしたいサロンです！次回の予約も楽しみにしています✨'
+    };
+
+    const text = `${starEmoji}\n\n${openings[stars]}\n\n${bodies[stars]}${commentPart}${closings[stars]}`;
+
+    document.getElementById('reviewText').textContent = text;
+  }
+
+  // ---- Copy & Open ----
+  function copyAndOpen() {
+    const text = document.getElementById('reviewText').textContent;
+    const btn = document.getElementById('copyBtn');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast();
+        btn.textContent = '✅ コピー済み！Googleを開いています…';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          window.open('https://g.page/r/CUKgwPbGa_mREAE/review', '_blank');
+        }, 600);
+        setTimeout(() => {
+          btn.textContent = '📋　コピーしてGoogleへ投稿する';
+          btn.classList.remove('copied');
+        }, 3500);
+      });
+    } else {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast();
+      setTimeout(() => window.open('https://g.page/r/CUKgwPbGa_mREAE/review', '_blank'), 600);
+    }
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
